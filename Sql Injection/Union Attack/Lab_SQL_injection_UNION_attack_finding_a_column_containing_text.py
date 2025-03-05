@@ -7,7 +7,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 req = requests.Session()
 
-url = input('Enter lab url: ')
 proxies = {
     'http':'http://127.0.0.1:8080',
     'https':'http://127.0.0.1:8080'
@@ -19,6 +18,8 @@ def filter_url():
     global url
     url = (url.split('.net', 1)[0]) + f'.net/filter?category=Pets{payload}'
 
+
+url = input('Enter lab url: ')
 
 filter_url()
 

