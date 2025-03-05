@@ -8,10 +8,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 req = requests.Session()
 
 proxies = {
-    'http':'http://127.0.0.1:8080',
+    'http':'http://127.0.0.1:8080', 
     'https':'http://127.0.0.1:8080'
 }
-
 payload = "'union+select+null,null,null--"
 
 def filter_url():
